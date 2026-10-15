@@ -8,7 +8,7 @@ Jenkins, .NET SDK và IIS nằm trên cùng một máy nên Deploy chỉ là sao
 Trên VPS, lấy mã nguồn (hoặc chỉ cần thư mục `scripts`) rồi mở **PowerShell bằng Run as administrator**:
 
 ```powershell
-git clone https://github.com/<tai-khoan>/WebBanHang.git C:\src\WebBanHang
+git clone https://github.com/Anpham120/WebBanHang.git C:\src\WebBanHang
 cd C:\src\WebBanHang
 powershell -ExecutionPolicy Bypass -File scripts\setup-server.ps1
 ```

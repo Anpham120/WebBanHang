@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Nhóm | ……… (3 sinh viên: ………, ………, ………) |
-| Repository | https://github.com/……… |
+| Repository | https://github.com/Anpham120/WebBanHang |
 | Jenkins | http://<IP-VPS>:8080, job **WebBanHang-CICD** |
 | Website | http://localhost/webbanhang |
 
