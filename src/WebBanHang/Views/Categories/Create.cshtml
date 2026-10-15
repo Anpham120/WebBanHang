@@ -1,0 +1,14 @@
+@model Category
+@{
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+<h1 class="h3 mb-3">Thêm danh mục</h1>
+
+<form asp-action="Create" method="post" class="col-md-6">
+    <partial name="_Form" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
