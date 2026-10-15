@@ -1,13 +1,13 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    One-time preparation of the Windows server that hosts Jenkins and IIS for WebBanHang.
+    One-time preparation of the Windows machine that runs the Jenkins builds and IIS for WebBanHang.
 
 .DESCRIPTION
-    Run it once in an elevated Windows PowerShell on the server (Windows Server 2016 or later, or
-    Windows 10/11). Every step is skipped when it is already done, so it is safe to run again.
+    Run it once in an elevated Windows PowerShell on that machine (Windows 10/11 or Windows Server 2016
+    or later). Every step is skipped when it is already done, so it is safe to run again.
 
-      1. .NET 8 SDK, installed for all users (Jenkins needs it to build)
+      1. .NET 8 SDK (installed for all users only when no 8.0 SDK is found)
       2. IIS and the ASP.NET Core 8 Hosting Bundle
       3. Deploy folder C:\wwwroot\webbanhang with App_Data and logs
       4. Application pool WebBanHangPool (No Managed Code)
@@ -18,6 +18,11 @@
 
     Git is only checked: install "Git for Windows" yourself if it is missing (Jenkins needs it).
 
+.PARAMETER JenkinsAccount
+    Windows account that runs the Jenkins agent (or the Jenkins service) and copies the new version
+    into the deploy folder, for example "MYPC\myuser". Default: the account of the Jenkins Windows
+    service when that service exists, otherwise the account running this script.
+
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File scripts\setup-server.ps1
 #>
@@ -27,7 +32,8 @@ param(
     [string] $PoolName = 'WebBanHangPool',
     [string] $SiteName = 'Default Web Site',
     [string] $AppName = 'webbanhang',
-    [string] $JenkinsServiceName = 'Jenkins'
+    [string] $JenkinsServiceName = 'Jenkins',
+    [string] $JenkinsAccount
 )
 
 $ErrorActionPreference = 'Stop'
@@ -63,9 +69,9 @@ function Invoke-Icacls {
 
 # ---------------------------------------------------------------- 1. .NET 8 SDK and Git
 Write-Step '1/6 .NET 8 SDK and Git'
-$dotnetExe = Join-Path $env:ProgramFiles 'dotnet\dotnet.exe'
+$dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
 $sdk8 = @()
-if (Test-Path $dotnetExe) { $sdk8 = @(& $dotnetExe --list-sdks | Where-Object { $_ -match '^8\.0\.' }) }
+if ($dotnet) { $sdk8 = @(& $dotnet.Source --list-sdks | Where-Object { $_ -match '^8\.0\.' }) }
 if ($sdk8.Count -gt 0) {
     Write-Host "Already installed: $($sdk8[0])"
 } else {
@@ -135,17 +141,17 @@ Invoke-Icacls $appData /grant "${poolIdentity}:(OI)(CI)M"
 Invoke-Icacls $logs /grant "${poolIdentity}:(OI)(CI)M"
 Write-Host "$poolIdentity : read on the site, modify on App_Data and logs."
 
-$jenkins = Get-CimInstance Win32_Service -Filter "Name='$JenkinsServiceName'" -ErrorAction SilentlyContinue
-if ($jenkins) {
-    $account = $jenkins.StartName
-    if ($account -eq 'LocalSystem') { $account = 'NT AUTHORITY\SYSTEM' }
-    if ($account.StartsWith('.\')) { $account = "$env:COMPUTERNAME\" + $account.Substring(2) }
-    Invoke-Icacls $DeployDir /grant "${account}:(OI)(CI)M"
-    Write-Host "$account (Jenkins service account) : modify on $DeployDir."
-} else {
-    Write-Warning "Service '$JenkinsServiceName' not found. Give the account that runs Jenkins 'Modify' on $DeployDir yourself."
+$account = $JenkinsAccount
+if (-not $account) {
+    $jenkins = Get-CimInstance Win32_Service -Filter "Name='$JenkinsServiceName'" -ErrorAction SilentlyContinue
+    if ($jenkins) { $account = $jenkins.StartName }
+    else { $account = [Security.Principal.WindowsIdentity]::GetCurrent().Name }
 }
+if ($account -eq 'LocalSystem') { $account = 'NT AUTHORITY\SYSTEM' }
+if ($account.StartsWith('.\')) { $account = "$env:COMPUTERNAME\" + $account.Substring(2) }
+Invoke-Icacls $DeployDir /grant "${account}:(OI)(CI)M"
+Write-Host "$account (runs the Jenkins builds) : modify on $DeployDir."
 
 Write-Step 'Done'
-if ($rebootNeeded) { Write-Warning 'A restart is pending: reboot the server before running the pipeline.' }
+if ($rebootNeeded) { Write-Warning 'A restart is pending: reboot the machine before running the pipeline.' }
 Write-Host 'Next: run the Jenkins pipeline. The first deployment fills the folder, then open http://localhost/webbanhang'

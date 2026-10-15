@@ -4,7 +4,7 @@
 |---|---|
 | Nhóm | ……… (3 sinh viên: ………, ………, ………) |
 | Repository | https://github.com/Anpham120/WebBanHang |
-| Jenkins | http://<IP-VPS>:8080, job **WebBanHang-CICD** |
+| Jenkins | https://<domain-jenkins>, job **WebBanHang-CICD**, agent Windows `windows-iis` |
 | Website | http://localhost/webbanhang |
 
 ## 1. Quy trình
