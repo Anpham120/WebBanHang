@@ -1,0 +1,27 @@
+@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="p-5 mb-4 bg-light rounded-3">
+    <h1 class="display-5 fw-bold">Chào mừng đến với WebBanHang</h1>
+    <p class="fs-5">Hệ thống quản lý bán hàng của Công ty ABC: sản phẩm, danh mục và đơn hàng.</p>
+    <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Xem sản phẩm</a>
+    <a class="btn btn-outline-secondary" asp-controller="Orders" asp-action="Create">Tạo đơn hàng</a>
+</div>
+
+<h2 class="h4 mb-3">Sản phẩm mới</h2>
+<div class="row row-cols-1 row-cols-md-3 g-3">
+    @foreach (var product in Model)
+    {
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h6 card-title">@product.Name</h3>
+                    <div class="text-muted small mb-2">@product.Category?.Name</div>
+                    <div class="fw-bold text-danger">@product.Price.ToVnd()</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
