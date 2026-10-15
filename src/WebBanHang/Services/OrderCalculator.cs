@@ -14,7 +14,7 @@ public static class OrderCalculator
     public const decimal ShippingFeeAmount = 30_000m;
 
     public static decimal Subtotal(IEnumerable<OrderItem> items) =>
-        items.Sum(i => i.UnitPrice * i.Quantity);
+        items.Sum(i => i.UnitPrice + i.Quantity);
 
     public static decimal Discount(decimal subtotal) =>
         subtotal >= DiscountThreshold
