@@ -16,6 +16,29 @@ IIS chỉ chạy trên Windows, nên mọi stage chạy trên một **Windows ag
 Agent tự kết nối ra controller qua WebSocket/HTTPS, nên không phải mở cổng nào trên máy Windows. Máy Windows phải bật và agent phải online lúc chạy pipeline.
 Controller có tên miền công khai nên GitHub gọi thẳng vào được, **không cần ngrok**.
 
+## 0. Chạy nhanh phần CI trên server Linux
+
+Cách nhanh nhất để thấy pipeline xanh (giống bài demo CI trên lớp): build, test và publish ngay trên server Linux chạy Jenkins, chưa cần Windows hay IIS.
+
+1. SSH vào server, cài Git và .NET 8 SDK rồi khởi động lại Jenkins:
+
+   ```bash
+   sudo apt-get update && sudo apt-get install -y git dotnet-sdk-8.0
+   dotnet --version                # phải ra 8.0.x
+   sudo systemctl restart jenkins  # để Jenkins nhận dotnet
+   ```
+
+   Không có gói `dotnet-sdk-8.0` (ví dụ Ubuntu 20.04) thì dùng script chính thức của Microsoft:
+
+   ```bash
+   curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+   sudo bash dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet
+   sudo ln -sf /usr/share/dotnet/dotnet /usr/bin/dotnet
+   ```
+
+2. Tạo job theo mục 4 và đặt **Script Path = `Jenkinsfile.ci`**. Pipeline gồm 5 stage Checkout → Restore → Build → Test → Publish và đính kèm file `WebBanHang-<phiên bản>.tar.gz` vào build.
+3. Muốn deploy lên IIS thì làm tiếp mục 1 và 2, rồi đổi **Script Path** về `Jenkinsfile`.
+
 ## 1. Chuẩn bị máy Windows (làm một lần)
 
 Cần: Windows 10/11 hoặc Windows Server, quyền Administrator, [Git for Windows](https://git-scm.com/download/win), Java 17 trở lên (cho agent; kiểm tra bằng `java -version`, thiếu thì cài [Temurin 21](https://adoptium.net/)).
@@ -82,7 +105,7 @@ Cần: *Pipeline*, *Git*, *GitHub*, *JUnit* (có sẵn trong bộ Install sugges
 | Pipeline | Repository URL | `https://github.com/Anpham120/WebBanHang.git` |
 | Pipeline | Credentials | Repo public: *- none -*. Repo private: *Add → Username with password* (GitHub username + Personal Access Token quyền `repo`) |
 | Pipeline | Branch Specifier | `*/main` |
-| Pipeline | Script Path | `Jenkinsfile` |
+| Pipeline | Script Path | `Jenkinsfile` (CI/CD đầy đủ, cần agent Windows) hoặc `Jenkinsfile.ci` (chỉ CI, chạy trên Linux) |
 
 Bấm **Save**, rồi **Build Now**. Sau lần chạy đầu Jenkins đọc `parameters` trong Jenkinsfile, nút đổi thành **Build with Parameters** với tham số `BRANCH` (mặc định `main`) để chạy thử nhánh khác. Chỉ `main` được deploy.
 
@@ -131,6 +154,9 @@ Khi PR được merge vào `main`, GitHub gửi sự kiện push, Jenkins thấy
 | Triệu chứng | Nguyên nhân thường gặp / cách xử lý |
 |---|---|
 | Build đứng ở `Waiting for next available executor` / `There are no nodes with the label 'windows'` | Agent chưa online hoặc nhãn sai: kiểm tra node `windows-iis` có Labels `windows` và đang kết nối |
+| Build đứng ở `Waiting for next available executor` khi dùng `Jenkinsfile.ci` | Built-In Node đang để 0 executor: *Manage Jenkins → Nodes → Built-In Node → Configure → Number of executors* = `2` |
+| `dotnet: command not found` trên Linux | Chưa cài SDK hoặc chưa khởi động lại Jenkins: làm lại mục 0 |
+| Build báo `Killed` ở stage Build hoặc Test | VPS thiếu RAM: tạo swap `sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
 | Agent không kết nối được | `Jenkins URL` sai (phải `https://<domain-jenkins>/`); reverse proxy (nginx) chưa chuyển tiếp WebSocket (header `Upgrade`/`Connection`); secret sai; Java dưới 17 |
 | `'dotnet' is not recognized` trong log | Agent chạy từ cửa sổ mở trước khi cài SDK: đóng, mở PowerShell mới rồi chạy lại lệnh agent |
 | Lỗi `git` ở stage Checkout | Chưa cài Git for Windows trên máy agent |
