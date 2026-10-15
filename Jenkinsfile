@@ -1,8 +1,9 @@
 // WebBanHang CI/CD: GitHub -> Jenkins -> Restore -> Build -> Test -> Publish -> Deploy to IIS -> Verify.
-// Runs on the Windows machine that hosts Jenkins, the .NET 8 SDK and IIS.
+// Runs on the Windows machine (agent label "windows") that has the .NET 8 SDK, Git and IIS.
+// The Jenkins controller itself may run on Linux; it only schedules the build on that agent.
 // A failure in any stage stops the pipeline, so a broken build never reaches IIS.
 pipeline {
-    agent any
+    agent { label 'windows' }
 
     parameters {
         string(name: 'BRANCH', defaultValue: 'main',

@@ -18,6 +18,7 @@ Developer ─ feature/* ─ Pull Request ─▶ main ─ webhook ─▶ Jenkins 
                                                            7. Verify     kiểm tra website sau triển khai
 ```
 
+- Jenkins controller có thể chạy trên Linux; các stage chạy trên một **Windows agent** (nhãn `windows`) có .NET 8 SDK, Git và IIS.
 - Lỗi ở bất kỳ stage nào làm pipeline dừng ngay; lỗi Build hoặc Test thì **không Publish, không Deploy**, IIS vẫn chạy bản cũ.
 - Chỉ nhánh `main` được deploy. Nhánh khác (chạy bằng *Build with Parameters → BRANCH*) dừng sau Publish.
 - Deploy giữ nguyên dữ liệu và cấu hình của môi trường: thư mục `App_Data` (CSDL SQLite), `logs`, `appsettings.Production.json` không bị ghi đè hay xóa.
