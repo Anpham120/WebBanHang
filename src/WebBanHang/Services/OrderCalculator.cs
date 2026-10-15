@@ -9,7 +9,7 @@ namespace WebBanHang.Services;
 public static class OrderCalculator
 {
     public const decimal DiscountThreshold = 1_000_000m;
-    public const decimal DiscountRate = 0.05m;
+    public const decimal DiscountRate = 0.05m
     public const decimal FreeShippingThreshold = 500_000m;
     public const decimal ShippingFeeAmount = 30_000m;
 
