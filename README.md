@@ -28,7 +28,8 @@ Developer ─ feature/* ─ Pull Request ─▶ main ─ webhook ─▶ Jenkins 
 
 | Đường dẫn | Nội dung |
 |---|---|
-| `Jenkinsfile` | Pipeline khai báo 7 stage |
+| `Jenkinsfile` | Pipeline CI/CD đầy đủ 7 stage (Deploy và Verify chạy trên Windows agent) |
+| `Jenkinsfile.ci` | Pipeline CI rút gọn (Checkout → Publish) chạy trên node Linux, không deploy IIS |
 | `src/WebBanHang/` | Ứng dụng MVC: `Models`, `Data` (EF Core + SQLite), `Services/OrderCalculator.cs` (tính tiền đơn hàng), `Controllers`, `Views` |
 | `tests/WebBanHang.Tests/` | Unit test xUnit cho `OrderCalculator` |
 | `scripts/setup-server.ps1` | Chuẩn bị máy chủ một lần: .NET 8 SDK, IIS, Hosting Bundle, App Pool, ứng dụng `/webbanhang`, phân quyền |
