@@ -1,0 +1,14 @@
+@model Product
+@{
+    ViewData["Title"] = "Thêm sản phẩm";
+}
+
+<h1 class="h3 mb-3">Thêm sản phẩm</h1>
+
+<form asp-action="Create" method="post" class="col-md-8">
+    <partial name="_Form" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
