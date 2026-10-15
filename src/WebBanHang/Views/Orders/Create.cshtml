@@ -1,0 +1,68 @@
+@model OrderCreateViewModel
+@{
+    ViewData["Title"] = "Tạo đơn hàng";
+}
+
+<h1 class="h3 mb-3">Tạo đơn hàng</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="CustomerName" class="form-label"></label>
+            <input asp-for="CustomerName" class="form-control" />
+            <span asp-validation-for="CustomerName" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Address" class="form-label"></label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+    </div>
+
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-end">Còn lại</th>
+                <th style="width: 140px">Số lượng</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Lines.Count; i++)
+            {
+                var product = Model.Lines[i].Product;
+                <tr>
+                    <td>@product?.Name</td>
+                    <td class="text-end">@(product?.Price.ToVnd())</td>
+                    <td class="text-end">@product?.Stock</td>
+                    <td>
+                        <input type="hidden" asp-for="Lines[i].ProductId" />
+                        <input asp-for="Lines[i].Quantity" type="number" min="0" max="@product?.Stock" class="form-control form-control-sm" />
+                        <span asp-validation-for="Lines[i].Quantity" class="text-danger"></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="text-muted small">
+        Giảm @((int)(OrderCalculator.DiscountRate * 100))% cho đơn từ @OrderCalculator.DiscountThreshold.ToVnd().
+        Miễn phí vận chuyển cho đơn từ @OrderCalculator.FreeShippingThreshold.ToVnd(),
+        dưới mức này phí vận chuyển là @OrderCalculator.ShippingFeeAmount.ToVnd().
+    </p>
+
+    <button type="submit" class="btn btn-primary">Tạo đơn hàng</button>
+    <a class="btn btn-link" asp-action="Index">Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

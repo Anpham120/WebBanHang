@@ -1,0 +1,76 @@
+@model Order
+@{
+    ViewData["Title"] = $"Đơn hàng #{Model.Id}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Đơn hàng #@Model.Id</h1>
+    <a class="btn btn-link" asp-action="Index">Quay lại danh sách</a>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.CustomerName)</dt>
+            <dd class="col-sm-8">@Model.CustomerName</dd>
+            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Phone)</dt>
+            <dd class="col-sm-8">@Model.Phone</dd>
+            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Address)</dt>
+            <dd class="col-sm-8">@Model.Address</dd>
+            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.OrderDate)</dt>
+            <dd class="col-sm-8">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Status)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(m => m.Status)</dd>
+        </dl>
+    </div>
+    <div class="col-md-6">
+        <form asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="row g-2 justify-content-md-end">
+            <div class="col-auto">
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<OrderStatus>()" class="form-select"></select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">Cập nhật trạng thái</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th class="text-end">Đơn giá</th>
+            <th class="text-end">Số lượng</th>
+            <th class="text-end">Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.ProductName</td>
+                <td class="text-end">@item.UnitPrice.ToVnd()</td>
+                <td class="text-end">@item.Quantity</td>
+                <td class="text-end">@item.LineTotal.ToVnd()</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-end">@Html.DisplayNameFor(m => m.Subtotal)</td>
+            <td class="text-end">@Model.Subtotal.ToVnd()</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="text-end">@Html.DisplayNameFor(m => m.Discount)</td>
+            <td class="text-end">-@Model.Discount.ToVnd()</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="text-end">@Html.DisplayNameFor(m => m.ShippingFee)</td>
+            <td class="text-end">@Model.ShippingFee.ToVnd()</td>
+        </tr>
+        <tr class="fw-bold">
+            <td colspan="3" class="text-end">@Html.DisplayNameFor(m => m.Total)</td>
+            <td class="text-end">@Model.Total.ToVnd()</td>
+        </tr>
+    </tfoot>
+</table>
