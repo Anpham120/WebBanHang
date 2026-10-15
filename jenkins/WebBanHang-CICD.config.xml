@@ -1,0 +1,43 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<!--
+  Pipeline job "WebBanHang-CICD" (Pipeline script from SCM).
+  Change the url element to your GitHub repository (replace OWNER/REPO). For a private repository
+  also add <credentialsId>YOUR_CREDENTIALS_ID</credentialsId> inside UserRemoteConfig.
+  Import: POST this file to http://JENKINS_URL/createItem?name=WebBanHang-CICD with the
+  header Content-Type: application/xml (see docs/HuongDan-CaiDat.md).
+-->
+<flow-definition plugin="workflow-job">
+  <description>CI/CD for WebBanHang: GitHub, Restore, Build, Test, Publish, IIS. The pipeline logic is in the Jenkinsfile.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <com.cloudbees.jenkins.GitHubPushTrigger plugin="github">
+          <spec></spec>
+        </com.cloudbees.jenkins.GitHubPushTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>https://github.com/OWNER/REPO.git</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/main</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="empty-list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>Jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
